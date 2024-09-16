@@ -8,7 +8,7 @@ import isValidId from "../middlewares/isValidId.js";
 
 const contactsRouter = Router();
 
-contactsRouter.get('/', ctrlWrapper(contactsControllers.getAllContactsController));
+contactsRouter.get('/', ctrlWrapper(contactsControllers.getContactsController));
 
 contactsRouter.get('/:contactId', isValidId, ctrlWrapper(contactsControllers.getContactByIdController));
 
