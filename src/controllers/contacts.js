@@ -6,6 +6,10 @@ import parseSortParams from '../utils/parseSortParams.js';
 import { sortField } from '../db/models/contacts.js';
 import parseContactsFilter from '../utils/filters/parseContactsFilter.js';
 
+import { saveFileToUploadsDir } from '../utils/saveFileToUploadsDir.js';
+import { env } from '../utils/env.js';
+import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
+
 export const getContactsController = async (req, res) => {
     const { page, perPage } = parsePaginationParams(req.query);
     const { sortBy, sortOrder } = parseSortParams({ ...req.query, sortField });
@@ -50,8 +54,19 @@ export const getContactByIdController = async (req, res) => {
 };
 
 export const addContactController = async (req, res) => {
-    const {_id: userId} = req.user;
-    const newContact = await addContact({ ...req.body, userId });
+    const { _id: userId } = req.user;
+
+    let photo;
+
+    if (req.file) {
+        if (env('ENABLE_CLOUDINARY') === 'true') {
+            photo = await saveFileToCloudinary(req.file);
+        } else {
+            photo = await saveFileToUploadsDir(req.file);
+        }
+    }
+
+    const newContact = await addContact({ ...req.body, userId, photo });
 
     res.status(201).json({
         status: 201,
@@ -62,11 +77,21 @@ export const addContactController = async (req, res) => {
 
 export const patchContactController = async (req, res) => {
     const { contactId } = req.params;
-    const {_id: userId} = req.user;
+    const { _id: userId } = req.user;
+    
+    let photo;
 
-    const result = await patchContact({_id: contactId, userId}, req.body);
+    if (req.file) {
+        if (env('ENABLE_CLOUDINARY') === 'true') {
+            photo = await saveFileToCloudinary(req.file);
+        } else {
+            photo = await saveFileToUploadsDir(req.file);
+        }
+    }
 
-     if (!result) {
+    const result = await patchContact({ _id: contactId, userId }, { ...req.body, photo});
+
+    if (!result) {
         throw createHttpError(404, `Contact with id ${contactId} not found`);
     }
 
