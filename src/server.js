@@ -1,12 +1,15 @@
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
+
 import authRouter from './routers/auth.js';
 import contactsRouter from './routers/contacts.js';
 import { env } from './utils/env.js';
 import errorHandler from './middlewares/errorHandler.js';
 import notFoundHandler from './middlewares/notFoundHandler.js';
 import logger from './middlewares/logger.js';
-import cookieParser from 'cookie-parser';
+
+import { swaggerDocs } from './middlewares/swaggerDocs.js';
 
 const PORT = Number(env('PORT', '3000'));
 
@@ -17,7 +20,9 @@ export const setupServer = () => {
     app.use(cors());
     app.use(logger);
     app.use(cookieParser());
+
     app.use(express.static('uploads'));
+    app.use('/api-docs', swaggerDocs());
 
     app.use('/auth', authRouter);
     app.use('/contacts', contactsRouter);

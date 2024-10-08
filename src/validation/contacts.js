@@ -22,6 +22,7 @@ export const createContactsSchema = Joi.object({
     isFavourite: Joi.boolean().messages({
         'boolean.base': 'IsFavourite should be a boolean',
     }),
+    photo: Joi.string(),
     contactType: Joi.string().valid(...contactTypeList).required().messages({
         'string.base': 'ContactType should be a string',
         'any.required': 'ContactType is required',
